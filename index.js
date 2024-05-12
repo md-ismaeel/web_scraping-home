@@ -37,25 +37,34 @@ const htmString = readDataFile();
 
 if (htmString) {
     const $ = cheerio.load(htmString);
-    const products = [];
+    const jobDetailsData = [];
 
-    $('div.job-card').each((index, element) => {
-        // console.log($(element).text());
-        let JobTitle = $(element).find('.job-title').text()
-        let jobType = $(element).find('.attributeVal').text()
-        products.push({
-            JobTitle,
-            jobType
-        })
-    })
+    $(".jsListItems").find(".job-card").each((index, elem) => {
+        const jobTitle = $(elem).find(".job-title").text();
+        const jobDetailsDiv = $(elem).find(".salaryNjobtype ").children()
+        const salary = $(jobDetailsDiv[0]).find(".perposelSalary ").text();
+        const jobType = $(jobDetailsDiv[1]).find(".attributeVal").text();
+        const companyName = $(jobDetailsDiv[2]).find(".attributeVal").text();
+        const experienceDivChildren = $(jobDetailsDiv[3]).find(".lineH ").children();
+        const experience = experienceDivChildren.length > 0 && $(experienceDivChildren[1]).text();
+        const jobPostedOn = $(elem).find(".jsPostedOn").text();
 
-    console.log(products);
+        if (jobTitle.length > 0) {
+            const jobDetails = {
+                "Job Title": jobTitle,
+                "Salary": salary,
+                "Job Type": jobType,
+                "Company": companyName,
+                "Experience": experience,
+                "Job Posted On": jobPostedOn
+            }
+            jobDetailsData.push(jobDetails);
+        }
+    });
+    console.log(jobDetailsData);
 
     const workBook = xlsx.utils.book_new()
-    const workSheet = xlsx.utils.json_to_sheet(products)
+    const workSheet = xlsx.utils.json_to_sheet(jobDetailsData)
     xlsx.utils.book_append_sheet(workBook, workSheet, "Sheet1");
-    xlsx.writeFile(workBook, "products.xlsx");
-
-} else {
-    console.log('content is not available');
+    xlsx.writeFile(workBook,"jobDataSheet.xlsx")
 }
